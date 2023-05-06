@@ -16,7 +16,6 @@ import static org.hamcrest.Matchers.*;
 
 public class CountryTest {
 
-
     Faker faker=new Faker();
     RequestSpecification reqSpec;
 
