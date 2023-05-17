@@ -170,8 +170,6 @@ public class ZippoTest {
                 .then()
                 .statusCode(200)
                 .log().body()
-
-
         ;
     }
 

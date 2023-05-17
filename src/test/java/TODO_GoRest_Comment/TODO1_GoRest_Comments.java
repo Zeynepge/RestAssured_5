@@ -22,12 +22,10 @@ Map<String,Object> newComment = new HashMap<>();
         newComment.put("body",comment);      gibi @Student
 Faker her zaman initialize edilmeli    Faker randomGenerator=new Faker();   gibi
 
- */
-
-
+*/
 public class TODO1_GoRest_Comments {
 
-    Faker randomfaker3=new Faker();
+    Faker faker2=new Faker();
     RequestSpecification reqSpec;
     int commentID;
 
@@ -37,20 +35,20 @@ public class TODO1_GoRest_Comments {
         baseURI="https://gorest.co.in/public/v2/comments";
 
         reqSpec=new RequestSpecBuilder()
-                .addHeader("Authorization","Bearer 3f4c352c7990cf988a5366a7baab6260362ca54a8bedc0a416b02e48926443b8")
+                .addHeader("Authorization","Bearer 6fdc14a1ab97bf9fecdaa233e63cfee45f2be7ab59d879668664b51639ba2de5")
                 .setContentType(ContentType.JSON)
                 .build();
     }
 
-    @Test(enabled = true)
-    public void createUserClass(){
+    @Test(enabled = false)
+    public void createCommentClass(){
 
         Comment newComment= new Comment();
 
-        newComment.post_id=randomfaker3.number().numberBetween(100,20000);
-        newComment.name=randomfaker3.name().fullName();
-        newComment.email=randomfaker3.internet().emailAddress();
-        newComment.body=randomfaker3.book().author();
+        newComment.post_id=19471;
+        newComment.name=faker2.name().fullName();
+        newComment.email=faker2.internet().emailAddress();
+        newComment.body=faker2.book().author();
 
         commentID=
                 given()
@@ -58,7 +56,6 @@ public class TODO1_GoRest_Comments {
                         .body(newComment)
 
                         .log().uri()
-                        .log().body()
 
                         .when()
                         .post("")
@@ -66,22 +63,21 @@ public class TODO1_GoRest_Comments {
                         .then()
                         .statusCode(201)
                         .contentType(ContentType.JSON)
+                        .log().body()
                         .extract().path("id")
         ;
 
     }
 
-   /* @Test(enabled = false)
-    public void createUserMap() {
-
-       // String rndFullname = randomUretici.name().fullName();
-        //String rndEmail = randomUretici.internet().emailAddress();
+    @Test(enabled = true)
+    public void createCommentMap() {
 
         Map<String,Object> newComment = new HashMap<>();
-        newComment.put("post_id",randomfaker2.number().numberBetween(100,20000));
-        newComment.put("name",randomfaker2.name().fullName());
-        newComment.put("email",randomfaker2.internet().emailAddress());
-        newComment.put("body",randomfaker2.book().author());
+
+        newComment.put("post_id",19471);
+        newComment.put("name",faker2.name().fullName());
+        newComment.put("email",faker2.internet().emailAddress());
+        newComment.put("body",faker2.book().author());
 
 
         commentID=
@@ -90,7 +86,6 @@ public class TODO1_GoRest_Comments {
                         .body(newComment)
 
                         .log().uri()
-                        .log().body()
 
                         .when()
                         .post("")
@@ -100,9 +95,87 @@ public class TODO1_GoRest_Comments {
                         .contentType(ContentType.JSON)
                         .extract().path("id")
         ;
-    }*/
+    }
 
+    @Test(dependsOnMethods = "createCommentMap")
+    public void getCommentByID(){
 
+        given()
+                .spec(reqSpec)
 
+                .when()
+                .get(""+commentID)
+
+                .then()
+                .log().body()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("id",equalTo(commentID))
+                ;
+
+    }
+
+    @Test(dependsOnMethods = "getCommentByID")
+    public void updateCommentByID(){
+
+        Comment newComment= new Comment();
+        String name=faker2.name().fullName();
+        String email=faker2.internet().emailAddress();
+        String body_=faker2.book().author();
+
+        newComment.post_id=19471;
+        newComment.name=name;
+        newComment.email=email;
+        newComment.body=body_;
+
+        given()
+                .spec(reqSpec)
+
+                .body(newComment)
+
+                .when()
+                .put(""+commentID)
+
+                .then()
+                .log().body()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .body("id",equalTo(commentID))
+                .body("name",equalTo(name))
+                .body("email",equalTo(email))
+                .body("body",equalTo(body_))
+                ;
+
+    }
+
+    @Test(dependsOnMethods = "updateCommentByID")
+    public void deleteCommentByID()
+    {
+        given()
+                .spec(reqSpec)
+
+                .when()
+                .delete(""+commentID)
+
+                .then()
+                .log().body()
+                .statusCode(204)
+
+                ;
+    }
+
+    @Test(dependsOnMethods = "deleteCommentByID")
+    public void deleteCommentByIDNegative(){
+        given()
+                .spec(reqSpec)
+
+                .when()
+                .delete(""+commentID)
+
+                .then()
+                .statusCode(404)
+                ;
+
+    }
 
 }

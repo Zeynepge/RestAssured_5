@@ -5,9 +5,14 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookies;
 import io.restassured.specification.RequestSpecification;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +23,7 @@ import static org.hamcrest.Matchers.*;
 public class CtizenShipsTest {
 
     // TODO : CtizenShip  API Automation nı yapınız (create, createNegative, update, delete, deleteNegative)
-    Faker faker=new Faker();
+    Faker faker1=new Faker();
     RequestSpecification reqSpec;
 
     String ctizenShipID;
@@ -27,12 +32,21 @@ public class CtizenShipsTest {
 
 
     @BeforeClass
-    public void Setup(){
+    public void Setup() throws IOException {
         baseURI="https://test.mersys.io";
 
+        String path="src/test/java/Excel_Data/Campus_Data.xlsx";
+
+        FileInputStream inputStream=new FileInputStream(path);
+        Workbook workbook= WorkbookFactory.create(inputStream);
+        Sheet sheet=workbook.getSheetAt(0);
+
+        String userName=String.valueOf(sheet.getRow(1).getCell(0));
+        String password=String.valueOf(sheet.getRow(1).getCell(1));
+
         Map<String,String > userCredential=new HashMap<>();
-        userCredential.put("username","turkeyts");
-        userCredential.put("password","TechnoStudy123");
+        userCredential.put("username",userName);
+        userCredential.put("password",password);
         userCredential.put("rememberMe","true");
 
         Cookies cookies=
@@ -47,7 +61,6 @@ public class CtizenShipsTest {
                         //.log().all()
                         .statusCode(200)
                         .extract().response().getDetailedCookies()
-
                 ;
 
         reqSpec=new RequestSpecBuilder()
@@ -59,12 +72,12 @@ public class CtizenShipsTest {
     @Test
     public void createCtizenShip(){
 
-        ctizenShipName=faker.name().fullName()+faker.number().digits(2);
+        ctizenShipName=faker1.name().fullName()+faker1.number().digits(2);
 
         Map<String,String> ctizenShip=new HashMap<>();
 
         ctizenShip.put("name",ctizenShipName);
-        ctizenShip.put("shortName",faker.name().lastName()+faker.number().digits(2));
+        ctizenShip.put("shortName",faker1.name().lastName()+faker1.number().digits(2));
 
         ctizenShipID=
                 given()
@@ -103,8 +116,8 @@ public class CtizenShipsTest {
     @Test(dependsOnMethods = "createCtizenShip")
     public void updateCtizenShip(){
 
-        ctizenShipName=faker.name().fullName()+faker.number().digits(2);
-        ctizenShipshortName=faker.name().lastName()+faker.number().digits(2);
+        ctizenShipName=faker1.name().fullName()+faker1.number().digits(2);
+        ctizenShipshortName=faker1.name().lastName()+faker1.number().digits(2);
 
         Map<String,String> ctizenShip=new HashMap<>();
         ctizenShip.put("id",ctizenShipID);
